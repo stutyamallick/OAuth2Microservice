@@ -1,13 +1,13 @@
-package com.learning.resource_server_imbd;
+package com.learning.resource_server_rottenTomato;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ResourceServerImbdApplication {
+public class ResourceServerRottenTomatoApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ResourceServerImbdApplication.class, args);
+		SpringApplication.run(ResourceServerRottenTomatoApplication.class, args);
 	}
 
 }

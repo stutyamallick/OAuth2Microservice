@@ -1,4 +1,4 @@
-package com.learning.resource_server_imbd.config;
+package com.learning.resource_server_boi.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
