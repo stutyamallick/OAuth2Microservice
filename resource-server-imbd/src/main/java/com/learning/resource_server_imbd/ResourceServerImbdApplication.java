@@ -1,4 +1,4 @@
-package com.learning.resource_server_rottenTomato;
+package com.learning.resource_server_imbd;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

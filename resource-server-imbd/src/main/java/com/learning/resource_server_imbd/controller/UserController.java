@@ -1,4 +1,4 @@
-package com.learning.resource_server_rottenTomato.controller;
+package com.learning.resource_server_imbd.controller;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;

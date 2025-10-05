@@ -1,4 +1,4 @@
-package com.learning.resource_server_rottenTomato.entity;
+package com.learning.resource_server_imbd.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

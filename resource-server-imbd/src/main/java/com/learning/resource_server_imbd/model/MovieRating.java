@@ -1,4 +1,4 @@
-package com.learning.resource_server_rottenTomato.model;
+package com.learning.resource_server_imbd.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,8 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class MovieRating {
 
+    private String title;
     private float criticsRating;
     private float audienceRating;
-    private String mostHelpfulReview;
-    private String mostHelpfulReviewBy;
 }

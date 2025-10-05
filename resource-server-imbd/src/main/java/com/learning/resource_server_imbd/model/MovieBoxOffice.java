@@ -1,4 +1,4 @@
-package com.learning.resource_server_rottenTomato.model;
+package com.learning.resource_server_imbd.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,11 +11,9 @@ import lombok.Setter;
 @AllArgsConstructor
 public class MovieBoxOffice {
 
+    private String title;
     private Integer budget;
     private Integer worldwideGross;
     private Integer indiaNett;
-    private Integer openingDay;
-    private Integer firstWeekend;
-    private Integer firstWeek;
     private String boxOfficeVerdict;
 }
