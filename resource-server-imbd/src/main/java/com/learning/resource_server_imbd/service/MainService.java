@@ -1,42 +1,71 @@
 package com.learning.resource_server_imbd.service;
 
 import com.learning.resource_server_imbd.entity.MovieEntity;
+import com.learning.resource_server_imbd.model.Movie;
 import com.learning.resource_server_imbd.model.MovieBoxOffice;
 import com.learning.resource_server_imbd.model.MovieRating;
 import com.learning.resource_server_imbd.model.MoviesResponseModel;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class MainService {
 
+    @Autowired
+    RestTemplate restTemplate;
+
     public MoviesResponseModel getAllMoviesWithRatingAndBoxOffice(Authentication authentication){
 
         String token = getTokenInfo(authentication);
-        String ratingStr = "";
-        String boxOfficeStr = "";
 
-        try {
-            List<MovieRating> allMoviesRating = movieRatings(token);
-            ratingStr = String.valueOf(allMoviesRating.get(0).getAudienceRating());
-        }catch(Exception exception){
-            ratingStr = exception.getMessage();
-        }
-        try {
-            List<MovieBoxOffice> allMovieBoxOffice = movieBoxOffices(token);
-            boxOfficeStr = allMovieBoxOffice.get(0).getBoxOfficeVerdict();
-        } catch (Exception exception){
-            boxOfficeStr = exception.getMessage();
-        }
         List<MovieEntity> allMovies = getJustMovie();
+        List<MovieRating> allMoviesRating = new ArrayList<>();
+        List<MovieBoxOffice> allMovieBoxOffice = new ArrayList<>();
 
-        return new MoviesResponseModel(token + "; " + ratingStr + "; " + boxOfficeStr, true, null);
+
+        try {
+            allMoviesRating = movieRatings(token);
+        }catch(Exception exception){
+            System.out.println("EXCEPTION while retrieving rating");
+        }
+        try {
+            allMovieBoxOffice = movieBoxOffices(token);
+        } catch (Exception exception){
+            System.out.println("EXCEPTION while retrieving box office");
+        }
+
+        List<Movie> movies = new ArrayList<>();
+
+        for (MovieEntity movie: allMovies){
+
+            MovieRating movieRating = allMoviesRating.stream().filter(
+                    obj -> obj.getTitle().equals(movie.getTitle())).toList().get(0);
+
+            MovieBoxOffice movieBoxOffice = allMovieBoxOffice.stream().filter(
+                    obj -> obj.getTitle().equals(movie.getTitle())).toList().get(0);
+
+            movies.add(
+                    new Movie(
+                            movie.getId(), movie.getTitle(), movie.getDirector(), movie.getActors(), movie.getYearOfRelease(), movie.getGenre(), movieRating, movieBoxOffice
+                    )
+            );
+
+        }
+
+        return new MoviesResponseModel(null, true, movies);
     }
 
     private List<MovieEntity> getJustMovie(){
@@ -53,28 +82,34 @@ public class MainService {
 
     private List<MovieRating> movieRatings(String token){
 
-        RestClient restClient = RestClient.builder()
-                .defaultHeaders(httpHeaders -> httpHeaders.setBearerAuth(token))
-                .baseUrl("lb://RESOURCE-SERVER-ROTTENTOMATO").build();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        return restClient
-                .get()
-                .uri("/api/rottenTomato/rating/all")
-                .retrieve()
-                .body(new ParameterizedTypeReference<List<MovieRating>>() {});
+        ResponseEntity<List<MovieRating>> response = restTemplate.exchange(
+                "lb://RESOURCE-SERVER-ROTTENTOMATO/api/rottenTomato/rating/all",
+                HttpMethod.GET,
+                entity,
+                new ParameterizedTypeReference<List<MovieRating>>() {}
+        );
+
+        return response.getBody();
     }
 
     private List<MovieBoxOffice> movieBoxOffices(String token){
 
-        RestClient restClient = RestClient.builder()
-                .defaultHeaders(httpHeaders -> httpHeaders.setBearerAuth(token))
-                .baseUrl("lb://RESOURCE-SERVER-BOI").build();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        return restClient
-                .get()
-                .uri("/api/boi/business/all")
-                .retrieve()
-                .body(new ParameterizedTypeReference<List<MovieBoxOffice>>() {});
+        ResponseEntity<List<MovieBoxOffice>> response = restTemplate.exchange(
+                "lb://RESOURCE-SERVER-BOI/api/boi/business/all",
+                HttpMethod.GET,
+                entity,
+                new ParameterizedTypeReference<List<MovieBoxOffice>>() {}
+        );
+
+        return response.getBody();
     }
 
     public String getTokenInfo(Authentication authentication) {
