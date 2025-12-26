@@ -121,8 +121,8 @@ public class SecurityConfiguration {
                         ClientSettings.builder().requireProofKey(true).build()
                 )
                 .build();
-        /* Proxy Client with grant type auth code flow */
 
+        /* Proxy Client with grant type auth code flow */
         RegisteredClient proxyClient = RegisteredClient.withId(UUID.randomUUID().toString())
                 .clientId("client")
                 .clientSecret("secret")

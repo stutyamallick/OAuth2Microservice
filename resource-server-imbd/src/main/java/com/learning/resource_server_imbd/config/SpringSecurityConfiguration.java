@@ -14,10 +14,6 @@ import org.springframework.web.client.RestTemplate;
 public class SpringSecurityConfiguration {
 
     @Bean
-    @LoadBalanced
-    public RestTemplate restTemplate(){ return new RestTemplate(); }
-
-    @Bean
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception{
 
         http.authorizeHttpRequests(c -> c.anyRequest().authenticated());
