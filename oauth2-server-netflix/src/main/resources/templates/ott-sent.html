@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>OTT Sent</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            perspective: 1000px;
+        }
+        .login-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transform: translateY(0);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #06b6d4, transparent);
+            transition: left 0.5s ease;
+        }
+
+        .login-card:hover::before {
+            left: 100%;
+        }
+
+        .login-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .login-header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            font-weight: 400;
+        }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <p>One time token sent to your registered email. Please check!</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

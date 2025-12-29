@@ -60,7 +60,12 @@ public class SecurityConfiguration {
     @Order(2)
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception{
         http.formLogin(Customizer.withDefaults());
-        http.authorizeHttpRequests(c -> c.anyRequest().authenticated());
+
+        http.oneTimeTokenLogin(Customizer.withDefaults());
+        http.authorizeHttpRequests(c ->
+                c.requestMatchers("/ott/sent").permitAll()
+                .anyRequest().authenticated()
+        );
         return http.build();
     }
 
@@ -73,7 +78,7 @@ public class SecurityConfiguration {
 
         UserDetails user2 = User.withUsername("mallick")
                 .password("user@123")
-                .authorities("ADMIN")
+                .authorities("USER", "ADMIN")
                 .build();
 
         return new InMemoryUserDetailsManager(user1, user2);
