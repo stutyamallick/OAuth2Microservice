@@ -8,6 +8,7 @@ import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -21,14 +22,13 @@ import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
-import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -45,13 +45,20 @@ public class SecurityConfiguration {
     @Bean
     @Order(1)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception{
-        OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
-
-        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
-                .oidc(Customizer.withDefaults());
-        http.exceptionHandling(e -> e.authenticationEntryPoint(
-                new LoginUrlAuthenticationEntryPoint("/login")
-        ));
+        http
+                .oauth2AuthorizationServer((authorizationServer) -> {
+                    http.securityMatcher(authorizationServer.getEndpointsMatcher());
+                    authorizationServer.oidc(Customizer.withDefaults());
+                })
+                .authorizeHttpRequests((authorize) -> authorize
+                        .anyRequest().authenticated()
+                )
+                .exceptionHandling((exceptions) -> exceptions
+                        .defaultAuthenticationEntryPointFor(
+                                new LoginUrlAuthenticationEntryPoint("/login"),
+                                new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
+                        )
+                );
 
         return http.build();
     }
@@ -59,13 +66,19 @@ public class SecurityConfiguration {
     @Bean
     @Order(2)
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception{
-        http.formLogin(Customizer.withDefaults());
 
-        http.oneTimeTokenLogin(Customizer.withDefaults());
-        http.authorizeHttpRequests(c ->
-                c.requestMatchers("/ott/sent").permitAll()
-                .anyRequest().authenticated()
-        );
+        http
+                .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/login", "/css/**").permitAll()
+                    .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/", false)
+                        .failureUrl("/login?error=true")
+                        .permitAll()
+                );
         return http.build();
     }
 
@@ -73,12 +86,12 @@ public class SecurityConfiguration {
     public InMemoryUserDetailsManager inMemoryUserDetailsManager(){
         UserDetails user1 = User.withUsername("stutya")
                 .password("user@123")
-                .authorities("USER")
+                .authorities("ROLE_USER")
                 .build();
 
-        UserDetails user2 = User.withUsername("mallick")
+        UserDetails user2 = User.withUsername("adhrit")
                 .password("user@123")
-                .authorities("USER", "ADMIN")
+                .authorities("ROLE_USER", "ROLE_ADMIN")
                 .build();
 
         return new InMemoryUserDetailsManager(user1, user2);
@@ -109,7 +122,6 @@ public class SecurityConfiguration {
                 .build();
 
         /* Client configuration for PKCE Flow */
-
         RegisteredClient publicClient = RegisteredClient.withId(String.valueOf(UUID.randomUUID()))
                 .clientId("pkce_flow_clientID")
                 .clientSecret("pkce_flow_secret")
@@ -136,7 +148,12 @@ public class SecurityConfiguration {
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .redirectUri("http://localhost:8080/login/oauth2/code/proxy-client")
                 .scope (OidcScopes.OPENID)
-                .clientSettings (ClientSettings.builder().requireAuthorizationConsent(true).build())
+                .clientSettings(
+                        ClientSettings.builder()
+                                .requireProofKey(false)
+                                .requireAuthorizationConsent(true)
+                                .build()
+                )
                 .build();
 
         return new InMemoryRegisteredClientRepository(ccFlowClient, publicClient, proxyClient);

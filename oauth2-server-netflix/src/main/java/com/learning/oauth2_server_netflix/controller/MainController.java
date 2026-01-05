@@ -6,9 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class MainController {
 
-    @GetMapping("/ott/sent")
-    public String sentOTT(){
-        return "ott-sent";
-    }
+    @GetMapping("/login")
+    public String customLogin(){ return "custom-login"; }
 
 }
