@@ -12,10 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
@@ -25,7 +21,6 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
@@ -81,24 +76,6 @@ public class SecurityConfiguration {
                 );
         return http.build();
     }
-
-    @Bean
-    public InMemoryUserDetailsManager inMemoryUserDetailsManager(){
-        UserDetails user1 = User.withUsername("stutya")
-                .password("user@123")
-                .authorities("ROLE_USER")
-                .build();
-
-        UserDetails user2 = User.withUsername("adhrit")
-                .password("user@123")
-                .authorities("ROLE_USER", "ROLE_ADMIN")
-                .build();
-
-        return new InMemoryUserDetailsManager(user1, user2);
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder(){ return NoOpPasswordEncoder.getInstance();}
 
     @Bean
     public RegisteredClientRepository registeredClientRepository(){
